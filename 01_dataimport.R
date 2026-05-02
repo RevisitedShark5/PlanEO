@@ -11,82 +11,82 @@ library(usethis)
 
 
 #Campylobacter
-campy <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+campy <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                     sheet = "CAMP")
 campy$condition <- 'campylobacter'
 
 #Cyclospora
-cycl <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+cycl <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "CYCL")
 cycl$condition <- 'cyclospora'
 
 #Cryptosporidium
-cryp<- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+cryp<- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                   sheet = "CRYP")
 cryp$condition <- 'cryptosporidium'
 
 #EAEC
-eaec <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+eaec <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "EAEC")
 eaec$condition <- 'eaec'
 
 #Entamoeba 
-enta <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+enta <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "ENTA")
 enta$condition <- 'entamoeba'
 
 #EPTP
-eptp <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+eptp <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "EPTP")
 eptp$condition <- 'eptp'
 
 #EPAP
-epap <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+epap <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "EPAP")
 epap$condition <- 'epap'
 
 #ETLT
-etlt <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+etlt <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "ETLT")
 etlt$condition <- 'etlt'
 
 #ETST
-etst <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+etst <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "ETST")
 etst$condition <- 'etst'
 
 #Giardia
-giar <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+giar <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "GIAR")
 giar$condition <- 'giardia'
 
 #Norovirus 
-noro <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+noro <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "NORO")
 noro$condition <- 'norovirus'
 
 #Rotavirus 
-rota <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+rota <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "ROTA")
 rota$condition <- 'rotavirus'
 
 #Salmonella
-salm <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+salm <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "SALM")
 salm$condition <- 'salmonella'
 
 #Shigella
-shig <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+shig <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "SHIG")
 shig$condition <- 'shigella'
 
 #STEC
-stec <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+stec <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "STEC")
 stec$condition <- 'stec'
 
 #Vibrio Cholera 
-vibr <- read_excel("Desktop/PLANEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+vibr <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
                    sheet = "VIBR")
 vibr$condition <- 'vibrio'
 
