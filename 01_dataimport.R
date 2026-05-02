@@ -6,6 +6,7 @@ library(tidyverse)
 library(readxl)
 library(metafor)
 library(usethis)
+library(assertthat)
 
 #Importing relevant condition-specific dfs
 
@@ -96,10 +97,10 @@ condition_list <- list(A = campy, B = cryp, C = cycl, D = eaec, E = enta, F = ep
                        N = shig, O = stec, P = vibr)
 
 condition_list <- lapply(condition_list, function(x) {
-  colnames(x) <- c("SiteID", "EstID", "ConditionID", 'Syndrome', 'AgeGrp','AgeLBMon', 
-                   'AgeUBMon', 'AgeMeanYr', 'AgeLBYr', 'AgeUBYr', 'Sex', 'DxMethod',
-                   'Strain', 'Subjects', 'Samples', 'Cases', 'Prev', 'SE', 'AgeMedianYr',
-                   'AgePresac', 'AgeSAC','AgeTeen', 'AgeAdult', 'Notes', 'Condition')
+  colnames(x) <- c("SITE_ID", "EST_ID", "CONDITION_ID", 'SYNDROME', 'AGEGRP','AgeLBMon', 
+                   'AgeUBMon', 'AgeMeanYr', 'AgeLBYr', 'AgeUBYr', 'SEX', 'DXMethod',
+                   'STRAIN', 'SUBJECTS', 'SAMPLES', 'CASES', 'PREV', 'SE', 'AgeMedianYr',
+                   'AgePresac', 'AgeSAC','AgeTeen', 'AgeAdult', 'NOTES', 'CONDITION')
   x
 })
 
@@ -108,5 +109,31 @@ list2env(condition_list, envir = .GlobalEnv)
 #Combining dfs 
 combined_condns <- rbind(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P)
 
-#Only keeping combined dataframe
+#Only keeping combined dataframe for conditions 
 remove(list = setdiff(ls(), "combined_condns"))
+
+###
+
+#Reading in 'LiteratureTracking' File 
+lit_tracking <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/Plan-EO Literature tracking.xlsx", 
+                           sheet = "SITE_index")
+### 
+
+#Combining location-data with condition-data 
+combined_condns2 <- combined_condns %>% left_join(lit_tracking, by = 'SITE_ID')
+
+#dropping those with missing location-data
+combined_condns2 <- combined_condns2 %>% 
+  filter(!is.na(combined_condns2$SITE_WHO_REGION), !is.na(combined_condns2$SITE_LEVEL), 
+         !is.na(combined_condns2$SITE_COUNTRY))
+
+
+###
+
+#Assert-checks for missing data 
+assertthat::assert_that(noNA(combined_condns2$SITE_WHO_REGION))
+assertthat::assert_that(noNA(combined_condns2$SITE_LEVEL))
+assertthat::assert_that(noNA(combined_condns2$SITE_COUNTRY))
+assertthat::assert_that(noNA(combined_condns2$CASES))
+assertthat::assert_that(noNA(combined_condns2$PREV))
+assertthat::assert_that(noNA(combined_condns2$SE))
