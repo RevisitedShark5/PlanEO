@@ -1,25 +1,35 @@
 #Reloading necessary libraries 
 library(tidyverse)
 
-#Reformatting 'Syndrome' and 'AgeGrp' so that the values don't have spaces 
-  
-  #All values of 'Syndrome' and 'AgeGrp' variable
-  unique(combined_condns$Syndrome)
-  unique(combined_condns$AgeGrp)
-  
-  #Syndrome 
-  combined_condns <- combined_condns %>% 
-    mutate(Syndrome = if_else(combined_condns$Syndrome == 'Medically attended diarrhea - inpatient', "Inpatient", combined_condns$Syndrome))
-  combined_condns <- combined_condns %>% 
-    mutate(Syndrome = if_else(combined_condns$Syndrome == 'Medically attended diarrhea - outpatient', "Outpatient", combined_condns$Syndrome))
-  combined_condns <- combined_condns %>% 
-    mutate(Syndrome = if_else(combined_condns$Syndrome == 'Community detected diarrhea', "Community-detected", combined_condns$Syndrome))  
+###
 
-  #AgeGrp
-  combined_condns <- combined_condns %>% mutate(AgeGrp = if_else(combined_condns$AgeGrp == 'Pre-school age children', 'PreschoolAgeChildren', combined_condns$AgeGrp))
-  combined_condns <- combined_condns %>% mutate(AgeGrp = if_else(combined_condns$AgeGrp == 'Combined ages', 'Combined', combined_condns$AgeGrp))
-  combined_condns <- combined_condns %>% mutate(AgeGrp = if_else(combined_condns$AgeGrp == 'School age children', 'SchoolAgeChildren', combined_condns$AgeGrp))
+#Reformatting 'SYNDROME' and 'AGEGRP' so that the values don't have spaces 
+  
+  #All values of 'SYNDROME' and 'AGEGRP' variable
+  unique(combined_condns2$SYNDROME)
+  unique(combined_condns2$AGEGRP)
+  
+  #SYNDROME 
+  combined_condns2 <- combined_condns2 %>% 
+    mutate(SYNDROME = if_else(combined_condns2$SYNDROME == 'Medically attended diarrhea - inpatient', "Inpatient", combined_condns2$SYNDROME))
+  combined_condns2 <- combined_condns2 %>% 
+    mutate(SYNDROME = if_else(combined_condns2$SYNDROME == 'Medically attended diarrhea - outpatient', "Outpatient", combined_condns2$SYNDROME))
+  combined_condns2 <- combined_condns2 %>% 
+    mutate(SYNDROME = if_else(combined_condns2$SYNDROME == 'Community detected diarrhea', "Community-detected", combined_condns2$SYNDROME))  
+
+  #AGEGRP
+  combined_condns2 <- combined_condns2 %>% mutate(AGEGRP = if_else(combined_condns2$AGEGRP == 'Pre-school age children', 'PreschoolAgeChildren', combined_condns2$AGEGRP))
+  combined_condns2 <- combined_condns2 %>% mutate(AGEGRP = if_else(combined_condns2$AGEGRP == 'Combined ages', 'Combined', combined_condns2$AGEGRP))
+  combined_condns2 <- combined_condns2 %>% mutate(AGEGRP = if_else(combined_condns2$AGEGRP == 'School age children', 'SchoolAgeChildren', combined_condns2$AGEGRP))
   
   
 #Dropping 'Notes' column
-combined_condns$Notes <- NULL
+combined_condns2$NOTES <- NULL
+
+### 
+
+#Reformatting Age Range
+library(dplyr)
+
+combined_condns2$AGERANGE <- if_else(combined_condns2$AgeLBMon >= 0 & combined_condns2$AgeUBMon < 60, "<5yr", ">= 5yr")
+#

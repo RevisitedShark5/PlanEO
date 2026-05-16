@@ -115,12 +115,16 @@ remove(list = setdiff(ls(), "combined_condns"))
 ###
 
 #Reading in 'LiteratureTracking' File 
-lit_tracking <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/Plan-EO Literature tracking.xlsx", 
-                           sheet = "SITE_index")
+locationData <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+                                                               sheet = "SITE_index")
+studyData <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/2026-02-13_FERG_results_UVA-SOM.xlsx", 
+                        sheet = "SOURCE_index")
+  
 ### 
 
 #Combining location-data with condition-data 
-combined_condns2 <- combined_condns %>% left_join(lit_tracking, by = 'SITE_ID')
+combined_condns2 <- combined_condns %>% left_join(locationData, by = 'SITE_ID')
+combined_condns2 <- combined_condns2 %>% left_join(studyData, by = 'SOURCE_ID')
 
 #dropping those with missing location-data
 combined_condns2 <- combined_condns2 %>% 
@@ -130,7 +134,27 @@ combined_condns2 <- combined_condns2 %>%
 
 ###
 
-#Assert-checks for missing data 
+condition_values <- unique(combined_condns2$CONDITION)
+
+for (val in condition_values) {
+  assign(
+    paste0("dx_", make.names(val)),
+    combined_condns2[combined_condns2$CONDITION == val, ],
+    envir = .GlobalEnv
+  )
+}
+
+### Data Quality Assurance and Fidelity Checks 
+
+###
+
+#Assert-checks for non-missing data 
+assertthat::assert_that(noNA(combined_condns2$SITE_ID))
+assertthat::assert_that(noNA(combined_condns2$EST_ID))
+assertthat::assert_that(noNA(combined_condns2$CONDITION_ID))
+assertthat::assert_that(noNA(combined_condns2$CONDITION))
+assertthat::assert_that(noNA(combined_condns2$AGEGRP))
+
 assertthat::assert_that(noNA(combined_condns2$SITE_WHO_REGION))
 assertthat::assert_that(noNA(combined_condns2$SITE_LEVEL))
 assertthat::assert_that(noNA(combined_condns2$SITE_COUNTRY))
@@ -138,14 +162,3 @@ assertthat::assert_that(noNA(combined_condns2$CASES))
 assertthat::assert_that(noNA(combined_condns2$PREV))
 assertthat::assert_that(noNA(combined_condns2$SE))
 
-##
-
-condition_values <- unique(combined_condns2$CONDITION)
-
-for (val in condition_values) {
-  assign(
-    paste0("conditions_", make.names(val)),
-    combined_condns2[combined_condns2$CONDITION == val, ],
-    envir = .GlobalEnv
-  )
-}
