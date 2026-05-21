@@ -3,7 +3,7 @@ library(metafor)
 
 ## Model 1 - General Prevalence 
 
-#Deriving logit-prevalence and SE for each individual study - 
+#Deriving logit-prevalence and SE for each individual study  
 combined_condns3 <- escalc(measure = "PLO",
               xi = CASES, 
               ni = SAMPLES,
@@ -31,8 +31,7 @@ results1$prev <- plogis(results1$logitPrev)
 
 ## Model 2 - Incorporation of Syndrome (e.g., "inpatient/outpatient") and Age Range
 
-
-#Random-effects meta-analysis by condition
+#Random-effects meta-analysis by condition, location, and age range
 results2 <- combined_condns3 %>%
   group_by(CONDITION, SYNDROME, AGERANGE) %>%
   group_modify(~ {
@@ -50,4 +49,5 @@ results2 <- combined_condns3 %>%
 
 #Estimated prevalence
 results2$prev <- plogis(results2$logitPrev)
+
 
