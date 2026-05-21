@@ -33,19 +33,25 @@ combined_condns2$NOTES <- NULL
   
 ### Age Range
 
-#Dropping those studies with above pre-school age children
+  #Dropping those studies with above pre-school age children
 combined_condns2 <- combined_condns2 %>% filter(AgeLBMon < 60)
 
-#Generating Age Range
+  #Generating Age Range
 combined_condns2$AGERANGE <- ifelse(combined_condns2$AgeLBMon >= 0 & combined_condns2$AgeUBMon < 12, "0-1yr",
                                       ifelse(combined_condns2$AgeLBMon >= 12 & combined_condns2$AgeUBMon < 24, "1-2yr",
                                              ifelse(combined_condns2$AgeLBMon >= 24 & combined_condns2$AgeUBMon < 60, "3-6yr", "MixedAges")))
+  #Assert-check for Age Range
+assertthat::assert_that(noNA(combined_condns2$AGERANGE))
+
 ### Diagnostic Method
 
 unique(combined_condns2$DXMethod)
 
   #DXMethod
 combined_condns2 <- combined_condns2 %>% mutate(DiagMethod = if_else(DXMethod == 'Molecular', "01Dx_Molc", "01Dx_Conv"))
+
+  #Assert-check for Diagnostic Method 
+assertthat::assert_that(noNA(combined_condns2$DiagMethod))
 
 ### Calculating study length midpoint
 
@@ -58,3 +64,16 @@ combined_condns2$Midpoint <- (combined_condns2$SITE_END - combined_condns2$SITE_
 
   #Converting to numeric
 combined_condns2$Midpoint <- as.numeric(combined_condns2$Midpoint)
+
+  #Assert-check for Midpoint Derivation
+assertthat::assert_that(noNA(combined_condns2$Midpoint)) #There is one study missing both a SITE_Start and SITE_END (File ID: 41975)
+assertthat::assert_that(all(combined_condns2$Midpoint != 0))
+
+### Rotavirus Vaccination
+
+  #Assert-check for Rotavirus Vaccination
+assertthat::assert_that(noNA(combined_condns2$SITE_RV_VAX)) #Same study as above is missing SITE_RV_VAX
+
+### Urban/Rural
+
+unique(combined_condns2$SITE_URBAN)
