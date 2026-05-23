@@ -91,17 +91,17 @@ Model2$prev <- plogis(Model2$logitPrev)
 prevComparison2 <- rawPrev2 %>% left_join(Model2, by=c('CONDITION', 'AGERANGE'))
 prevComparison2 <- select(prevComparison2, CONDITION, AGERANGE, RawPrev, prev)
 
-###
+### The estimates are too small
 
 #General Condition-Specific Raw Prevalence and SE
 
 #Estimated prevalence derived from logit-prevalence
 rawPrev3 <- combined_condns4 %>% 
-  group_by(CONDITION, AGERANGE) %>%
+  group_by(CONDITION, AGERANGE, SYNDROME) %>%
   summarize(RawPrev = mean(PREV),
             RawSE = mean(SE))
 
-#Model 3 - Random-effects meta-analysis by condition and age range
+#Model 3 - Random-effects meta-analysis by condition and age range and syndrome
 Model3 <- combined_condns4 %>%
   group_by(CONDITION, AGERANGE) %>% 
   group_modify(~ {
@@ -109,6 +109,7 @@ Model3 <- combined_condns4 %>%
                      V       = .x$vi,
                      data    = .x,
                      method  = "REML",
+                     verbose = TRUE,
                      level   = 95,
                      random  = ~ 1 | SITE_ID/EST_ID)
     
@@ -129,5 +130,5 @@ Model3$prev <- plogis(Model3$logitPrev)
 
 #Comparison of Raw Prevalence and Random-Effects Model Prevalence
 prevComparison3 <- rawPrev3 %>% left_join(Model3, by=c('CONDITION', 'AGERANGE'))
-prevComparison3 <- select(prevComparison3, CONDITION, AGERANGE, RawPrev, prev)
+prevComparison3 <- select(prevComparison3, CONDITION, AGERANGE, SYNDROME, RawPrev, prev)
 
