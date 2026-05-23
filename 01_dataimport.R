@@ -132,23 +132,28 @@ combined_condns <- rbind(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S)
 #Only keeping combined dataframe for conditions 
 remove(list = setdiff(ls(), "combined_condns"))
 
-###
+### Incorporation of Location Data
 
-#Reading in 'LiteratureTracking' File 
+#Reading in 'LiteratureTracking' File for Location Data
 locationData <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets/Plan-EO Literature tracking.xlsx", 
                                                                sheet = "SITE_index")
-
-  
-### 
 
 #Combining location-data with condition-data 
 combined_condns2 <- combined_condns %>% left_join(locationData, by = 'SITE_ID')
 
+### 
+
+#Filtering out those with missing location data
+missingLocation <- combined_condns2 %>% 
+  filter(is.na(combined_condns2$SITE_WHO_REGION) | is.na(combined_condns2$SITE_LEVEL) | is.na(combined_condns2$SITE_COUNTRY))
 
 #Dropping those with missing location-data
 combined_condns2 <- combined_condns2 %>% 
   filter(!is.na(combined_condns2$SITE_WHO_REGION), !is.na(combined_condns2$SITE_LEVEL), 
          !is.na(combined_condns2$SITE_COUNTRY))
+
+#Filtering out those with missing sample, cases, prevalence, and/or SE data
+missingCases <- combined_condns2 %>% filter(is.na(SAMPLES)|is.na(CASES)|is.na(PREV)|is.na(SE))
 
 #Dropping those with missing sample, cases, prevalence, and/or SE data
 combined_condns2 <- combined_condns2 %>% 
@@ -156,7 +161,7 @@ combined_condns2 <- combined_condns2 %>%
          !is.na(combined_condns2$PREV), !is.na(combined_condns2$SE))
 
 
-###
+### Separating out individual conditions 
 
 condition_values <- unique(combined_condns2$CONDITION)
 
