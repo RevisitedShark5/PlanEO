@@ -2,133 +2,113 @@
 library(metafor)
 library(lme4)
 
-## Deriving logit-prevalence and SE for each individual study  
+### Deriving logit-prevalence and SE for each individual study ------------------------------------ 
 combined_condns4 <- escalc(measure = "PLO",
                            xi = CASES, 
                            ni = SAMPLES,
                            data = combined_condns3)
 
-### Prevalence from random-effects meta-analytical model by Condition
-
-
-#General Condition-Specific Raw Prevalence and SE
-
-  #Estimated prevalence derived from logit-prevalence
-rawPrev1 <- combined_condns4 %>% 
-  group_by(CONDITION) %>%
-  summarize(RawPrev = mean(PREV),
-            RawSE = mean(SE))
-
-  #Model 1 - Random-effects meta-analysis by condition
-Model1 <- combined_condns4 %>%
-  group_by(CONDITION) %>% 
-  group_modify(~ {
-    model1 <- rma.mv(yi=.x$yi, 
-                     V=.x$vi,
-                     data=.x,
-                     method="REML",
-                     level=95,
-                     random = ~ 1 | SITE_ID/EST_ID)
-    
-    tibble(
-      logitPrev = model1$b[1],
-      se        = model1$se[1],
-      pval      = model1$pval[1],
-      ci.lb     = model1$ci.lb[1],
-      ci.ub     = model1$ci.ub[1],
-      studies   = model1$k,
-      tau2_site = model1$sigma2[1],
-      tau2_est  = model1$sigma2[2]
-    )
-  })
-
-  #Estimated prevalence derived from logit-prevalence
-Model1$prev <- plogis(Model1$logitPrev)
-
-  #Comparison of Raw Prevalence and Random-Effects Model Prevalence
-prevComparison1 <- rawPrev1 %>% left_join(Model1, by='CONDITION')
-prevComparison1 <- select(prevComparison1, CONDITION, RawPrev, prev)
-
-
-### Prevalence from random-effects meta-analytical model by Condition & Age Range
-
-
-#General Condition-Specific Raw Prevalence and SE
-
-#Estimated prevalence derived from logit-prevalence
-rawPrev2 <- combined_condns4 %>% 
-  group_by(CONDITION, AGERANGE) %>%
-  summarize(RawPrev = mean(PREV),
-            RawSE = mean(SE))
-
-#Model 2 - Random-effects meta-analysis by condition and age range
-Model2 <- combined_condns4 %>%
-  group_by(CONDITION, AGERANGE) %>% 
-  group_modify(~ {
-    model2 <- rma.mv(yi      = .x$yi, 
-                     V       = .x$vi,
-                     data    = .x,
-                     method  = "REML",
-                     level   = 95,
-                     random  = ~ 1 | SITE_ID/EST_ID)
-    
-    tibble(
-      logitPrev = model2$b[1],
-      se        = model2$se[1],
-      pval      = model2$pval[1],
-      ci.lb     = model2$ci.lb[1],
-      ci.ub     = model2$ci.ub[1],
-      studies   = model2$k,
-      tau2_site = model2$sigma2[1],
-      tau2_est  = model2$sigma2[2]
-    )
-  })
-
-#Estimated prevalence derived from logit-prevalence
-Model2$prev <- plogis(Model2$logitPrev)
-
-#Comparison of Raw Prevalence and Random-Effects Model Prevalence
-prevComparison2 <- rawPrev2 %>% left_join(Model2, by=c('CONDITION', 'AGERANGE'))
-prevComparison2 <- select(prevComparison2, CONDITION, AGERANGE, RawPrev, prev)
-
-### The estimates are too small
-
-#General Condition-Specific Raw Prevalence and SE
-
-#Estimated prevalence derived from logit-prevalence
-rawPrev3 <- combined_condns4 %>% 
+### Raw Prevalence by CONDITION, SYNDROME, & AGERANGE ---------------------------------------------
+rawPrev <- combined_condns4 %>% 
   group_by(CONDITION, AGERANGE, SYNDROME) %>%
   summarize(RawPrev = mean(PREV),
             RawSE = mean(SE))
 
-#Model 3 - Random-effects meta-analysis by condition and age range and syndrome
-Model3 <- combined_condns4 %>%
-  group_by(CONDITION, AGERANGE) %>% 
-  group_modify(~ {
-    model3 <- rma.mv(yi      = .x$yi, 
-                     V       = .x$vi,
-                     data    = .x,
-                     method  = "REML",
-                     verbose = TRUE,
-                     level   = 95,
-                     random  = ~ 1 | SITE_ID/EST_ID)
+
+### Checking number of groups per cell ------------------------------------------------------------
+  
+  cell_count <- combined_condns4 %>%
+    group_by(CONDITION, AGERANGE, SYNDROME) %>%
+    summarise(k = n_distinct(SITE_ID))
+  
+  #Exporting cell count
+    write.csv(cell_count, "cell_count.csv")
+
+### Model Configuration ---------------------------------------------------------------------------    
     
-    tibble(
-      logitPrev = model3$b[1],
-      se        = model3$se[1],
-      pval      = model3$pval[1],
-      ci.lb     = model3$ci.lb[1],
-      ci.ub     = model3$ci.ub[1],
-      studies   = model3$k,
-      tau2_site = model3$sigma2[1],
-      tau2_est  = model3$sigma2[2]
-    )
-  })
 
-#Estimated prevalence derived from logit-prevalence
-Model3$prev <- plogis(Model3$logitPrev)
+#IMPORTANT! - BYPASS FOR (K <= 1) IN ORDER TO RUN THE RANDOM-EFFECTS LOGIT MODEL! DO NOT FORGET TO REMOVE WHEN CELL SIZE INCREASES
+combined_condns4 <- combined_condns4 %>%
+  group_by(CONDITION, AGERANGE, SYNDROME) %>%
+  filter(n() > 1) %>%
+  ungroup()
 
-#Comparison of Raw Prevalence and Random-Effects Model Prevalence
-prevComparison3 <- rawPrev3 %>% left_join(Model3, by=c('CONDITION', 'AGERANGE'))
-prevComparison3 <- select(prevComparison3, CONDITION, AGERANGE, SYNDROME, RawPrev, prev)
+#Checking number of levels for categorical fixed-effects covariates to ensure eventual model convergence 
 
+  #SITE_RV_VAX
+    CNDN_RVvax <- combined_condns4 %>% 
+  group_by(CONDITION) %>% 
+  summarise(n_levels = n_distinct(SITE_RV_VAX))
+    
+    assert_that(all(CNDN_RVvax$n_levels > 1))
+
+  #URBAN
+    CNDN_Urban <- combined_condns4 %>% 
+  group_by(CONDITION) %>% 
+  summarise(n_levels = n_distinct(URBAN))
+
+    assert_that(all(CNDN_Urban > 1))    
+
+#Model1 is a recreation of the 'FERG' model which runs a hierarchical mixed-effects model with SYNDROME/AGERANGE as random-effects with SITE_ID/EST_ED and SITE_WHO_REGION/SITE_COUNTRY as random effects. 
+#Model1 differs from the above model in that instead of running a mixed-effects model on each combination of CONDITION, SYNDROME, and AGERANGE, it instead runs a general ME model that calculate logit-prevalence with SYNDROME/AGERANGE as fixed effects.
+
+    Model1 <- combined_condns4 %>%
+      split(.$CONDITION) %>%
+      map_dfr(function(df) {
+        
+        # Set/standardizing fixed-effect referent levels for SITE_RV_VAX and URBAN
+        df <- df %>%
+          mutate(
+            SITE_RV_VAX = factor(SITE_RV_VAX, levels = unique(combined_condns4$SITE_RV_VAX)),
+            URBAN = factor(URBAN, levels = unique(combined_condns4$URBAN))
+          )
+        
+        # Fitting Model1 ~ Hierarchical mixed-effects model with SYNDROME/AGERANGE/SITE_RV_VAX/MIDPOINT/URBAN as fixed-effects 
+                            #and SITE_ID/EST_ID + SITE_WHO_REGION/SITE_COUNTRY as random-effects
+        
+        fit <- rma.mv(yi = df$yi,
+                      V = df$vi,
+                      data   = df,
+                      method = "REML",
+                      verbose = TRUE,
+                      mods = ~ SYNDROME + AGERANGE + SITE_RV_VAX + MIDPOINT + URBAN,
+                      random = list(~ 1 | SITE_ID/EST_ID))
+        
+        pred_grid <- df %>%
+          distinct(SYNDROME, AGERANGE) %>%
+          mutate(
+            SITE_RV_VAX = factor("NO", levels = levels(df$SITE_RV_VAX)),
+            MIDPOINT  = mean(df$MIDPOINT, na.rm = TRUE),
+            URBAN  = factor("NO", levels = levels(df$URBAN)))
+        
+        # Drop the intercept column — predict.rma.mv adds it internally so keeping it would make it redundant
+        newmods <- model.matrix(fit$formula.mods, data = pred_grid)
+        newmods <- newmods[, colnames(newmods) != "(Intercept)", drop = FALSE]
+        
+        # Using model to generate predictions by CONDITION, SYNDROME, AND AGERANGE
+        preds <- predict(fit, newmods = newmods)
+        
+        pred_grid %>%
+          select(SYNDROME, AGERANGE) %>%
+          mutate(
+            MEPrev = plogis(preds$pred),
+            prev_cilb = plogis(preds$ci.lb),
+            prev_ciub = plogis(preds$ci.ub)
+          )
+        
+      }, .id = "CONDITION")
+    
+    
+### Cleaning up code for output -------------------------------------------------------------------
+
+#Combining raw prevalence and hierarchical mixed-effects modeled prevalence
+derivedPrev <- rawPrev %>% 
+  left_join(Model1, by=c('CONDITION', 'SYNDROME', 'AGERANGE'))
+derivedPrev <- select(derivedPrev, CONDITION, SYNDROME, AGERANGE, RawPrev, MEPrev)
+
+derivedPrev <- derivedPrev %>% 
+  mutate(PrevPercentageChange = (((RawPrev - MEPrev)/RawPrev)*100))
+
+
+#Export to CSV
+write.csv(derivedPrev, "derivedPrev.csv")
