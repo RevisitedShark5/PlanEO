@@ -1,52 +1,45 @@
 #(Re)loading Relevant Libraries
+library(car)
 library(tidyverse)
 
+#Ensuring reference level is set to '00Asymptomatic'
+combined_condns4 <- combined_condns4 %>%
+  mutate(SYNDROME = relevel(factor(SYNDROME), ref = "00Asymptomatic"))
 
-combined_condns5 <- escalc(measure = "PLO", 
-                 xi = CASES,
-                 ni = SAMPLES,
-                 data = combined_condns3)
-
-combined_condns5 <- combined_condns5 %>% mutate(SYNDROME = relevel(factor(SYNDROME), ref = '00Asymptomatic'))
-
-
-### aORs for Model4 -------------------------------------------------------------------------------
-aORs <- combined_condns5 %>%
+#Deriving random-effects meta-analytical Adjusted ORs
+aORs <- combined_condns4 %>%
   group_by(CONDITION, AGERANGE) %>%
-  group_modify(function(sub, grp) {
+  group_modify(~ {
+    model1 <- rma.mv(yi=yi,
+                     V=vi,
+                     mods= ~ SYNDROME,
+                     data= .x,
+                     verbose = TRUE,
+                     control = list(iter.max = 10000, eval.max = 1000),
+                     method= "REML",
+                     random= ~ 1 | SITE_ID/EST_ID)
     
-    # Standardize factor levels
-    sub <- sub %>%
-      mutate(SITE_RV_VAX = factor(SITE_RV_VAX, levels = unique(combined_condns5$SITE_RV_VAX)),
-        URBAN = factor(URBAN, levels = unique(combined_condns5$URBAN)))
-    
-    # Fit aOR model
-    fit <- rma.mv(
-      yi = yi, V = vi,
-      mods   = ~ SYNDROME + URBAN + SITE_RV_VAX + MIDPOINT,
-      random = list(~ 1 | SITE_ID/EST_ID),
-      data   = sub,
-      method = "REML",
-      control = list(iter.max = 10000, eval.max = 1000),
-      verbose = TRUE)
-    
-    # Extract SYNDROME coefficients only
-    coef_names  <- names(coef(fit))
-    syndrome_idx <- grepl("^SYNDROME", coef_names)
-    log_aOR <- coef(fit)[syndrome_idx]
-    se_log_aOR <- sqrt(diag(vcov(fit))[syndrome_idx])
-    
-    # Return results in df
     tibble(
-      SYNDROME  = gsub("SYNDROME", "", coef_names[syndrome_idx]),
-      aOR = exp(log_aOR),
-      aOR_CI_lo = exp(log_aOR - 1.96 * se_log_aOR),
-      aOR_CI_hi = exp(log_aOR + 1.96 * se_log_aOR)
+      category = rownames(model1$b),
+      logOR = as.numeric(model1$b),
+      se    = as.numeric(model1$se),
+      pval  = as.numeric(model1$pval),
+      ci.lb = as.numeric(model1$ci.lb),
+      ci.ub = as.numeric(model1$ci.ub),
+      studies = model1$k,
+      aOR   = exp(as.numeric(model1$b)),
+      lower = exp(as.numeric(model1$ci.lb)),
+      upper = exp(as.numeric(model1$ci.ub))
     )
-    
-  }) %>%
-  ungroup() %>%
-  select(CONDITION, AGERANGE, SYNDROME, aOR, aOR_CI_lo, aOR_CI_hi)
-########################
+  })
 
+#Recoding 'SYNDROME' variable to be concordant for merging
+aORs <- aORs %>%
+  mutate(
+    SYNDROME = str_remove(category, "^SYNDROME"),
+    SYNDROME = na_if(SYNDROME, "intrcpt")
+  )
 
+#Dropping intercept
+aORs <- aORs %>%
+  filter(!is.na(SYNDROME))

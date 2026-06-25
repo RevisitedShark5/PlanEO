@@ -166,3 +166,8 @@ Model4 <- combined_condns4 %>%
 #Comparison of Raw Prevalence and Random-Effects Model Prevalence
 prevComparison4 <- rawPrev4 %>% left_join(Model4, by=c('CONDITION', 'AGERANGE', 'SYNDROME'))
 prevComparison4 <- select(prevComparison4, CONDITION, AGERANGE, SYNDROME, RawPrev, prev_pop)
+
+### 
+
+conditionURBAN <- combined_condns4 %>% group_by(CONDITION) %>% summarise(count_YES = sum(URBAN == 'YES', na.rm = TRUE),
+                                                                         count_NO = sum(URBAN == 'NO', na.rm = TRUE))

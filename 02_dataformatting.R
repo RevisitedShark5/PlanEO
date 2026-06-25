@@ -67,7 +67,7 @@ unique(combined_condns2$DXMethod)
   #Recoding 'DXMethod' to be binary
 combined_condns2 <- combined_condns2 %>% mutate(DIAGMETHOD = if_else(DXMethod == 'Molecular', "01Dx_Molc", "02Dx_NonMolc"))
 
-  #Dropping those without 'Molecular' for 'DiagMethod' (non-PCR)
+  #Dropping those without 'Molecular' for 'DIAGMethod' (non-PCR)
 combined_condns2 <- combined_condns2 %>% filter(DIAGMETHOD == '01Dx_Molc')
   
   #Assert-check that all remaining observations have 'DIAGMETHOD' == '01Dx_Molc
@@ -102,11 +102,11 @@ assertthat::assert_that(all(combined_condns2$MIDPOINT != 0)) #Assert-that check 
 
 ### Rotavirus Vaccination -------------------------------------------------------------------------
 
-  #Recoding to capitalizations
+  #Recoding values to all-caps
   combined_condns2$SITE_RV_VAX <- toupper(combined_condns2$SITE_RV_VAX)
 
-  #Assert-check for Rotavirus Vaccination
-assertthat::assert_that(noNA(combined_condns2$SITE_RV_VAX)) #Same study as above is missing SITE_RV_VAX
+  #Assert-check for no NAs Rotavirus Vaccination
+assertthat::assert_that(noNA(combined_condns2$SITE_RV_VAX)) 
 
 ### Urban/Rural -----------------------------------------------------------------------------------
 

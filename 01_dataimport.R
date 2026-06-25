@@ -118,11 +118,10 @@ condition_list <- list(A = aden, B = astr, C = campy, D = cryp, E = cycl, F = ea
                        Q = shig, R = stec, S = vibr)
 
 #Standardizing variable (column) names 
-new_names <- c("SITE_ID", "EST_ID", "CONDITION_ID", "SYNDROME", "AGEGRP",
-               "AgeLBMon", "AgeUBMon", "AgeMeanYr", "AgeLBYr", "AgeUBYr",
-               "SEX", "DXMethod", "STRAIN", "SUBJECTS", "SAMPLES", "CASES",
-               "PREV", "SE", "NOTES", "COVIDENCEID", "PLANEO_SOURCE", "CONDITION")
+new_names <- c("SITE_ID", "EST_ID", "CONDITION_ID", "SYNDROME", "AGEGRP", "AgeLBMon", "AgeUBMon", "AgeMeanYr", "AgeLBYr", "AgeUBYr",
+               "SEX", "DXMethod", "STRAIN", "SUBJECTS", "SAMPLES", "CASES","PREV", "SE", "NOTES", "COVIDENCEID", "PLANEO_SOURCE", "CONDITION")
 
+#Applying standardized column names to each df 
 condition_list <- lapply(condition_list, 
                          setNames, nm = new_names)
 
@@ -146,17 +145,19 @@ locationDataDuplicates <- locationData %>%
   filter(n() > 1) %>%
   arrange(SITE_ID)
 
-#Filtering out those duplicates (duplicates have missing 'CovidenceID', otherwise nearly identical)
+#Filtering out those duplicates (duplicates have missing 'CovidenceID', otherwise nearly identical with the exception of 'SITE_DUR_MONTH')
 locationData <- locationData %>% filter(!is.na(`Covidence ID`))
 
 
 #Combining location-data with condition-data 
+#'Inner-join' to ensure only those with valid condition data are matched to those with valid location data
 combined_condns2 <- combined_condns %>% inner_join(locationData, 
                                                   by = 'SITE_ID',
                                                   relationship = 'many-to-one')
 
 ### Addressing Missing Data -----------------------------------------------------------------------
 
+    ## Missing Location Data 
 #Filtering out those with missing location data
 missingLocation <- combined_condns2 %>% 
   filter(is.na(combined_condns2$SITE_WHO_REGION) | is.na(combined_condns2$SITE_LEVEL) | is.na(combined_condns2$SITE_COUNTRY))
@@ -167,6 +168,8 @@ write.csv(missingLocation, "missingLocation.csv")
 combined_condns2 <- combined_condns2 %>% 
   filter(!is.na(combined_condns2$SITE_WHO_REGION), !is.na(combined_condns2$SITE_LEVEL), 
          !is.na(combined_condns2$SITE_COUNTRY))
+
+    ## Missing Sample, Cases, Prevalence, and/or SE data
 
 #Filtering out those with missing sample, cases, prevalence, and/or SE data
 missingCases <- combined_condns2 %>% filter(is.na(SAMPLES)|is.na(CASES)|is.na(PREV)|is.na(SE))
@@ -193,7 +196,7 @@ for (val in condition_values) {
 
 ### Data Quality Assurance and Fidelity Checks ----------------------------------------------------
 
-#Assert-check for duplicate rows
+#Assert-check for duplicate rows (i.e., duplicate observations)
 assertthat::assert_that(!any(duplicated(combined_condns2)))
 
 #Assert-checks for non-missing data 
