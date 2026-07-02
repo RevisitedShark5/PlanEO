@@ -16,8 +16,7 @@ rawPrev <- combined_condns4 %>%
   summarize(RawPrev = mean(PREV),
             RawSE = mean(SE))
 
-### Prevalence from random-effects meta-analytical model by CONDITION & AGERANGE & SYNDROME (MODEL 4)  
-
+### Prevalence from random-effects meta-analytical model by CONDITION & AGERANGE & SYNDROME (MODEL 4) ----------------------
 
 #Checking number of groups per cell
 cell_count <- combined_condns4 %>%
@@ -27,7 +26,7 @@ cell_count <- combined_condns4 %>%
 
 write.csv(cell_count, "cell_count.csv")
 
-###
+### BYPASS CODE -----------------------------------------------------------------------------------
 
 #IMPORTANT! - BYPASS FOR (K <= 1) IN ORDER TO RUN THE RANDOM-EFFECTS LOGIT MODEL! DO NOT FORGET TO REMOVE WHEN CELL SIZE INCREASES 
 combined_condns4 <- combined_condns4 %>%
@@ -35,7 +34,7 @@ combined_condns4 <- combined_condns4 %>%
   filter(n() > 1) %>%
   ungroup()
 
-###
+### Model 1 
 
 #Model 1 - Random-effects meta-analysis by CONDITION, AGERANGE, & SYNDROME with SITE_ID/EST_ID as random-effects
 Model1 <- combined_condns4 %>%

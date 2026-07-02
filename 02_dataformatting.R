@@ -31,11 +31,9 @@ combined_condns2$`Covidence ID`<- NULL
       #Filtering out 'Mortality'
   combined_condns2 <- combined_condns2 %>% filter(SYNDROME != 'Mortality')
   
-      #Filtering out 'Unspecified'
-  combined_condns2 <- combined_condns2 %>% filter(SYNDROME != '04Unspecified')
   
       #Assert-checking to make sure that 'Syndrome' is classified correctly 
-  assert_that(all(combined_condns2$SYNDROME %in% c("00Asymptomatic","01CommunityDetected", "02Outpatient","03Inpatient")))
+  assert_that(all(combined_condns2$SYNDROME %in% c("00Asymptomatic","01CommunityDetected", "02Outpatient","03Inpatient", "04Unspecified")))
   
 
 ### Samples & Cases -------------------------------------------------------------------------------
@@ -64,17 +62,18 @@ assertthat::assert_that(noNA(combined_condns2$AGERANGE))
 
 unique(combined_condns2$DXMethod)
 
-  #Recoding 'DXMethod' to be binary
-combined_condns2 <- combined_condns2 %>% mutate(DIAGMETHOD = if_else(DXMethod == 'Molecular', "01Dx_Molc", "02Dx_NonMolc"))
+#Combining 'Conventional' and 'Other/unspecified'
+combined_condns2 <- combined_condns2 %>% 
+  mutate(DXMethod = if_else(DXMethod == "Conventional" | DXMethod == "Other/unspecified", "Conventional/Other", DXMethod))
 
-  #Dropping those without 'Molecular' for 'DIAGMethod' (non-PCR)
-combined_condns2 <- combined_condns2 %>% filter(DIAGMETHOD == '01Dx_Molc')
+#combined_condns2 <- combined_condns2 %>% filter(DXMethod == 'PCR')
+
   
-  #Assert-check that all remaining observations have 'DIAGMETHOD' == '01Dx_Molc
-assertthat::assert_that(all(combined_condns2$DIAGMETHOD == '01Dx_Molc'))
+  #Assert-check that all remaining observations have 'DXMethod = PCR, Conventional/Other, or Nested PCR
+assertthat::assert_that(all(combined_condns2$DXMethod == 'PCR' | combined_condns2$DXMethod == 'Conventional/Other' | combined_condns2$DXMethod == 'Nested PCR'))
   
   #Assert-check for no NAs for Diagnostic Method 
-assertthat::assert_that(noNA(combined_condns2$DIAGMETHOD))
+assertthat::assert_that(noNA(combined_condns2$DXMethod))
 
 ### Calculating study length MIDPOINT -------------------------------------------------------------
 
@@ -98,12 +97,27 @@ combined_condns2 <- combined_condns2 %>% filter(!is.na(MIDPOINT))
 assertthat::assert_that(noNA(combined_condns2$MIDPOINT)) #Assert-that check no NA for Midpoint
 assertthat::assert_that(all(combined_condns2$MIDPOINT != 0)) #Assert-that check that none are zero
 
+### Site Income -----------------------------------------------------------------------------------
+
+unique(combined_condns2$SITE_INCOME)
+
+combined_condns2 <- combined_condns2 %>%
+  mutate(SITE_INCOME = if_else(combined_condns2$SITE_INCOME == 'Low income', "01LowIncome", combined_condns2$SITE_INCOME))
+
+combined_condns2 <- combined_condns2 %>%
+  mutate(SITE_INCOME = if_else(combined_condns2$SITE_INCOME == 'Lower middle income', "02LowerMiddleIncome", combined_condns2$SITE_INCOME))
+
+combined_condns2 <- combined_condns2 %>%
+  mutate(SITE_INCOME = if_else(combined_condns2$SITE_INCOME == 'Upper middle income', "03UpperMiddleIncome", combined_condns2$SITE_INCOME))
 
 
 ### Rotavirus Vaccination -------------------------------------------------------------------------
 
   #Recoding values to all-caps
   combined_condns2$SITE_RV_VAX <- toupper(combined_condns2$SITE_RV_VAX)
+
+  #Assert-check that SITE_RV_VAX is only YES/NO
+assertthat::assert_that(all(combined_condns2$SITE_RV_VAX %in% c('YES', 'NO')))
 
   #Assert-check for no NAs Rotavirus Vaccination
 assertthat::assert_that(noNA(combined_condns2$SITE_RV_VAX)) 
@@ -119,5 +133,5 @@ combined_condns2 <- combined_condns2 %>% mutate(URBAN = if_else(SITE_URBAN == 'U
 ### Consolidating only relevant variables for analysis --------------------------------------------
 combined_condns3 <- select(combined_condns2, SITE_ID, EST_ID, CONDITION_ID, SYNDROME, SEX, SUBJECTS, SAMPLES, CASES, PREV,
                            SE, COVIDENCEID, CONDITION, SOURCE_ID, SITE_WHO_REGION, SITE_INCOME, SITE_LEVEL, SITE_ISO, SITE_COUNTRY,
-                           SITE_RV_VAX, AGERANGE, DIAGMETHOD, MIDPOINT, URBAN)
+                           SITE_RV_VAX, AGERANGE, DXMethod, MIDPOINT, URBAN)
 

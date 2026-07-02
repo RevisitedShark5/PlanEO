@@ -137,17 +137,13 @@ remove(list = setdiff(ls(), "combined_condns"))
 
 #Reading in Geographic/Location Data
 locationData <- read_excel("~/Desktop/PlanEO_ModelBuild/Datasets//Plan-EO Literature review results.xlsx", 
-                                                               sheet = "SITE_index")
+                                                               sheet = "SITE_Index")
 
-#Duplication 'SITE_ID' for locationData
+#Checking duplicates for locationData
 locationDataDuplicates <- locationData %>%
   group_by(SITE_ID) %>%
   filter(n() > 1) %>%
   arrange(SITE_ID)
-
-#Filtering out those duplicates (duplicates have missing 'CovidenceID', otherwise nearly identical with the exception of 'SITE_DUR_MONTH')
-locationData <- locationData %>% filter(!is.na(`Covidence ID`))
-
 
 #Combining location-data with condition-data 
 #'Inner-join' to ensure only those with valid condition data are matched to those with valid location data
