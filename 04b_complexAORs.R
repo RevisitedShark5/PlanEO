@@ -72,7 +72,8 @@ aORs4 <- combined_condns5 %>%
     fit <- rma.mv(
       yi = yi, V = vi,
       mods   = ~ SYNDROME + URBAN + SITE_RV_VAX + SITE_INCOME,
-      random = ~ 1 | SITE_ID/EST_ID,
+      random = list (~ 1 | SITE_ID/EST_ID,
+                     ~1 | SITE_WHO_REGION/SITE_COUNTRY),
       data = sub,
       method = "REML",
       control = list(iter.max = 10000, eval.max = 1000),

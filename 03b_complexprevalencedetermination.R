@@ -76,7 +76,8 @@ combined_condns4 <- combined_condns4 %>%
                       verbose = TRUE,
                       control = list(iter.max = 10000, eval.max = 1000),
                       mods = ~ SYNDROME + AGERANGE,
-                      random = ~ 1 | SITE_ID/EST_ID)
+                      random = list (~ 1 | SITE_ID/EST_ID,
+                                     ~1 | SITE_WHO_REGION/SITE_COUNTRY))
         
         pred_grid <- df %>%
           distinct(SYNDROME, AGERANGE) 
@@ -123,7 +124,8 @@ Model2 <- combined_condns4 %>%
                   verbose = TRUE,
                   control = list(iter.max = 10000, eval.max = 1000),
                   mods = ~ SYNDROME + AGERANGE + SITE_RV_VAX,
-                  random = ~ 1 | SITE_ID/EST_ID)
+                  random = list (~ 1 | SITE_ID/EST_ID,
+                                 ~1 | SITE_WHO_REGION/SITE_COUNTRY))
     
     pred_grid <- df %>%
       distinct(SYNDROME, AGERANGE) %>%
@@ -171,7 +173,8 @@ Model3 <- combined_condns4 %>%
                   verbose = TRUE,
                   control = list(iter.max = 10000, eval.max = 1000),
                   mods = ~ SYNDROME + AGERANGE + SITE_RV_VAX + URBAN,
-                  random = ~ 1 | SITE_ID/EST_ID)
+                  random = list (~ 1 | SITE_ID/EST_ID,
+                                 ~1 | SITE_WHO_REGION/SITE_COUNTRY))
     
     pred_grid <- df %>%
       distinct(SYNDROME, AGERANGE) %>%
@@ -223,7 +226,8 @@ Model3 <- arrange(Model3, CONDITION, SYNDROME, AGERANGE)
                       verbose = TRUE,
                       control = list(iter.max = 10000, eval.max = 1000),
                       mods = ~ SYNDROME + AGERANGE + SITE_RV_VAX + SITE_INCOME + URBAN,
-                      random = ~ 1 | SITE_ID/EST_ID)
+                      random = list (~ 1 | SITE_ID/EST_ID,
+                                     ~1 | SITE_WHO_REGION/SITE_COUNTRY))
         
         pred_grid <- df %>%
           distinct(SYNDROME, AGERANGE) %>%
