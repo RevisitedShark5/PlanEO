@@ -3,6 +3,9 @@ library(lubridate)
 
 ### Data Formating --------------------------------------------------------------------------------
 
+#Keeping only 'combined_condns2'
+remove(list = setdiff(ls(), 'combined_condns2'))
+
 #Dropping 'Notes' column
 combined_condns2$NOTES <- NULL
 
@@ -33,7 +36,11 @@ combined_condns2$`Covidence ID`<- NULL
   
   
       #Assert-checking to make sure that 'Syndrome' is classified correctly 
-  assert_that(all(combined_condns2$SYNDROME %in% c("00Asymptomatic","01CommunityDetected", "02Outpatient","03Inpatient", "04Unspecified")))
+  assert_that(all(combined_condns2$SYNDROME %in% c("00Asymptomatic",
+                                                   "01CommunityDetected", 
+                                                   "02Outpatient",
+                                                   "03Inpatient", 
+                                                   "04Unspecified")))
   
 
 ### Samples & Cases -------------------------------------------------------------------------------
@@ -66,7 +73,8 @@ unique(combined_condns2$DXMethod)
 combined_condns2 <- combined_condns2 %>% 
   mutate(DXMethod = if_else(DXMethod == "Conventional" | DXMethod == "Other/unspecified", "Conventional/Other", DXMethod))
 
-#combined_condns2 <- combined_condns2 %>% filter(DXMethod == 'PCR')
+#Keeping only 'PCR' and 'Nested PCR' (currently inactive)
+#combined_condns2 <- combined_condns2 %>% filter(DXMethod == 'PCR' | DXMethod == 'Nested PCR')
 
   
   #Assert-check that all remaining observations have 'DXMethod = PCR, Conventional/Other, or Nested PCR
