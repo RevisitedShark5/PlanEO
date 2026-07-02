@@ -195,6 +195,28 @@ for (val in condition_values) {
 #Assert-check for duplicate rows (i.e., duplicate observations)
 assertthat::assert_that(!any(duplicated(combined_condns2)))
 
+#Assert-check that all individual conditions are accounted for in the combined df
+assertthat::assert_that(all(combined_condns2$CONDITION %in% c('Adenovirus',
+                                                              'Astrovirus',
+                                                              'Campylobacter',
+                                                              'Cyclospora',
+                                                              'Cryptosporidium',
+                                                              'EAEC',
+                                                              'Entamoeba',
+                                                              'EPTP',
+                                                              'EPAP',
+                                                              'ETLT',
+                                                              'ETST',
+                                                              'Giardia',
+                                                              'Norovirus',
+                                                              'Rotavirus',
+                                                              'Salmonella',
+                                                              'Sapovirus',
+                                                              'Shigella',
+                                                              'STEC',
+                                                              'Vibrio')))
+
+
 #Assert-checks for non-missing data 
 assertthat::assert_that(noNA(combined_condns2$SITE_ID))
 assertthat::assert_that(noNA(combined_condns2$EST_ID))
